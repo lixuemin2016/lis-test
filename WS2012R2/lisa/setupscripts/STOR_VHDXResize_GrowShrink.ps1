@@ -289,7 +289,7 @@ if ( $newSize.contains("GB") -and $vhdxInfoResize.Size/1gb -ne $newSize.Trim("GB
 #
 # Let system have some time for the volume change to be indicated
 #
-$sleepTime = 60
+$sleepTime = 10
 Start-Sleep -s $sleepTime
 
 #
@@ -377,7 +377,6 @@ if (-not $?)
 #
 # Let system have some time for the volume change to be indicated
 #
-$sleepTime = 60
 Start-Sleep -s $sleepTime
 
 # Now start the VM if IDE disk attached or offline resize
