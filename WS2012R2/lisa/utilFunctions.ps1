@@ -320,8 +320,19 @@ function SaveResultToXML([String] $testDir)
     # remove users with undefined name (remove template)
     $testResult.testsuite.testcase | Where-Object { $_.Name -eq "" } | ForEach-Object  { [void]$testResult.testsuite.RemoveChild($_) }
     # save xml to file
-    $resultXMLFile = Join-Path -path $testDir -childPath $resultXMLFileName
-    $resultXMLFile = (Get-Item -Path ".\" -Verbose).FullName + "\" + $resultXMLFile
+    #
+    # Check to see if the provided log path is absolute
+    #
+    if ([System.IO.Path]::IsPathRooted($testDir))
+    {
+        $logPath = $testDir
+    }
+    else
+    {
+        $logPath = (Get-Item -Path ".\" -Verbose).FullName + "\" + $testDir
+    }
+
+    $resultXMLFile = $logPath + "\" + $resultXMLFileName
     $testResult.Save($resultXMLFile)
 }
 
