@@ -208,7 +208,7 @@ function checkResults([string] $vmName, [string] $hvServer)
 	$sts = CheckFile "/root/1"
 	if (-not $sts[-1])
 	{
-		Write-Output "ERROR: Cannot get test file after restore"
+		Write-Output "ERROR: Cannot get test file after restore" >> $summaryLog
 		return $False
 	}
 
