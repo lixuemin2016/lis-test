@@ -30,13 +30,13 @@
 #>
 
 
-function runSetup([string] $vmName, [string] $hvServer, [string] $driveletter) 
-{	
+function runSetup([string] $vmName, [string] $hvServer, [string] $driveletter)
+{
 	$sts = Test-Path $driveletter
 	if (-not $sts)
 	{
 		Write-Output "Error: Drive ${driveletter} does not exist"
-		return $False	
+		return $False
 	}
 	Write-Output "Info: Removing old backups"
 	try { Remove-WBBackupSet -Force -WarningAction SilentlyContinue }
@@ -61,31 +61,31 @@ function runSetup([string] $vmName, [string] $hvServer, [string] $driveletter)
 	}
 
 	# Check to see Linux VM is running VSS backup daemon
-	$sts = RunRemoteScript "STOR_VSS_Check_VSS_Daemon.sh"		 
-	if (-not $sts[-1])		
+	$sts = RunRemoteScript "STOR_VSS_Check_VSS_Daemon.sh"
+	if (-not $sts[-1])
     {
-		Write-Output "ERROR executing $remoteScript on VM. Exiting test case!" >> $summaryLog		
-		Write-Output "ERROR: Running $remoteScript script failed on VM!"		
-		return $False		
+		Write-Output "ERROR executing $remoteScript on VM. Exiting test case!" >> $summaryLog
+		Write-Output "ERROR: Running $remoteScript script failed on VM!"
+		return $False
 	}
-	
+
 
 	Write-Output "Info: VSS Daemon is running" >> $summaryLog
 
-	# Create a file on the VM before backup		
- 	$sts = CreateFile "/root/1"		
- 	if (-not $sts[-1])		
-	{		
- 	  Write-Output "ERROR: Cannot create test file"		
-     	return $False		
- 	}		
- 
+	# Create a file on the VM before backup
+ 	$sts = CreateFile "/root/1"
+ 	if (-not $sts[-1])
+	{
+ 	  Write-Output "ERROR: Cannot create test file"
+     	return $False
+ 	}
+
  	Write-Output "File created on VM: $vmname" >> $summaryLog
 	return $True
 }
 
 
-function startBackup([string] $vmName, [string] $driveletter) 
+function startBackup([string] $vmName, [string] $driveletter)
 {
     # Remove Existing Backup Policy
 	try { Remove-WBPolicy -all -force }
@@ -127,15 +127,15 @@ function startBackup([string] $vmName, [string] $driveletter)
 	# Let's wait a few Seconds
 	Start-Sleep -Seconds 70
 
-	# Delete file on the VM	
+	# Delete file on the VM
 	$vmState = $(Get-VM -name $vmName -ComputerName $hvServer).state
-    if (-not $vmState) {			
-		$sts = DeleteFile		
-		if (-not $sts[-1])		
-		{		
+    if (-not $vmState) {
+		$sts = DeleteFile
+		if (-not $sts[-1])
+		{
 			Write-Output "ERROR: Cannot delete test file!" >> $summaryLog
-			return $False		
-		}		
+			return $False
+		}
 		Write-Output "File deleted on VM: $vmname" >> $summaryLog
 	}
 	return $backupLocation
@@ -161,7 +161,7 @@ function restoreBackup([string] $backupLocation)
 	return $True
 }
 
-function checkResults([string] $vmName, [string] $hvServer) 
+function checkResults([string] $vmName, [string] $hvServer)
 {
    # Review the results
 	$RestoreTime = (New-Timespan -Start (Get-WBJob -Previous 1).StartTime -End (Get-WBJob -Previous 1).EndTime).Minutes
@@ -181,14 +181,14 @@ function checkResults([string] $vmName, [string] $hvServer)
 	if (-not $vm.state) {
 		Write-Output "Waiting for vm to turn off"
 		Start-Sleep -Seconds 60
-		
+
 		if ( $vm.state -ne "Off" )
 		{
 			Write-Output "ERROR: VM is not in OFF state, current state is " + $vm.state >> $summaryLog
 			return $False
 		}
 	}
-	
+
 
 	# Now Start the VM
 	$timeout = 300
@@ -204,6 +204,14 @@ function checkResults([string] $vmName, [string] $hvServer)
 	}
 
 	Start-Sleep -s 60
+	# Check the file on the VM after restore
+	$sts = CheckFile "/root/1"
+	if (-not $sts[-1])
+	{
+		Write-Output "ERROR: Cannot get test file after restore"
+		return $False
+	}
+
 	# Now Check the boot logs in VM to verify if there is no Recovering journals in it .
 	$sts=CheckRecoveringJ
     if ($sts[-1])
@@ -225,7 +233,7 @@ function checkResults([string] $vmName, [string] $hvServer)
     }
 }
 
-function runCleanup([string] $backupLocation) 
+function runCleanup([string] $backupLocation)
 {
     # Remove Created Backup
     Write-Output "Removing old backups from $backupLocation"
