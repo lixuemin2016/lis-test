@@ -1265,6 +1265,7 @@ function DoStartSystem([System.Xml.XmlElement] $vm, [XML] $xmlData)
     LogMsg 6 "Info : $($vm.vmName) is being started"
     Start-VM $vm.vmName -ComputerName $vm.hvServer | out-null
 
+    #$timeout = 180
     $timeout = 180
     while ($timeout -gt 0)
     {
@@ -1280,10 +1281,34 @@ function DoStartSystem([System.Xml.XmlElement] $vm, [XML] $xmlData)
         start-sleep -seconds 1
         $timeout -= 1
     }
-
+    ##########################################################
+    # if timeout 0, try to start vm again, change for bug
+    ########################################################
     #
     # Check if we timed out waiting to reach the Hyper-V Running state
     #
+    if ($timeout -eq 0)
+    {
+        LogMsg 6 "Info : $($vm.vmName) is being started again for bug - cannot reset"
+        Start-VM $vm.vmName -ComputerName $vm.hvServer | out-null
+
+        $timeout = 180
+        while ($timeout -gt 0)
+        {
+            #
+            # Check if the VM is in the Hyper-v Running state
+            #
+            $v = Get-VM $vm.vmName -ComputerName $vm.hvServer
+            if ($($v.State) -eq "Running")
+            {
+                break
+            }
+
+            start-sleep -seconds 1
+            $timeout -= 1
+        }
+    }
+    ####################################################################
     if ($timeout -eq 0)
     {
         LogMsg 0 "Warn : $($vm.vmName) never reached Hyper-V status Running - timed out`n       Terminating test run."
@@ -1338,11 +1363,39 @@ function DoSystemStarting([System.Xml.XmlElement] $vm, [XML] $xmlData)
         UpdateState $vm $ForceShutdown
     }
 
+
+    #
+    # Check if we timed out waiting to reach the Hyper-V Running state -Reset Bug
+    #
     $v = Get-VM $vm.vmName -ComputerName $vm.hvServer
     if ($v.State -ne "Running")
     {
-        LogMsg 0 "Error: $($vm.vmName) SystemStarting entered state without being in a HyperV Running state - disabling VM"
-        $vm.emailSummary += "    SystemStarting entered without being in a HyperV Running state - disabling VM<br />"
+        LogMsg 6 "Info : $($vm.vmName) is being started again for bug - cannot reset"
+        Start-VM $vm.vmName -ComputerName $vm.hvServer | out-null
+
+        $timeout = 180
+        while ($timeout -gt 0)
+        {
+            #
+            # Check if the VM is in the Hyper-v Running state
+            #
+            $v = Get-VM $vm.vmName -ComputerName $vm.hvServer
+            if ($($v.State) -eq "Running")
+            {
+                break
+            }
+
+            start-sleep -seconds 1
+            $timeout -= 1
+        }
+    }
+    ####################################################################
+
+    $v = Get-VM $vm.vmName -ComputerName $vm.hvServer
+    if ($v.State -ne "Running")
+    {
+        LogMsg 0 "Error: $($vm.vmName) SystemStarting entered state without being in a HyperV Running state even reset again - disabling VM"
+        $vm.emailSummary += "    SystemStarting entered without being in a HyperV Running state even reset again - disabling VM<br />"
         $vm.currentTest = "done"
         UpdateState $vm $ForceShutdown
     }
