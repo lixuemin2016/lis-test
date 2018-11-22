@@ -1316,7 +1316,7 @@ function DoStartSystem([System.Xml.XmlElement] $vm, [XML] $xmlData)
 
         $v = Get-VM $vm.vmName -ComputerName $vm.hvServer
         Stop-VM $v -ComputerName $vm.hvServer | out-null
-        $vm.currentTest = "done"
+        # $vm.currentTest = "done"
         UpdateState $vm $ShuttingDown
     }
     else
@@ -1396,7 +1396,7 @@ function DoSystemStarting([System.Xml.XmlElement] $vm, [XML] $xmlData)
     {
         LogMsg 0 "Error: $($vm.vmName) SystemStarting entered state without being in a HyperV Running state even reset again - disabling VM"
         $vm.emailSummary += "    SystemStarting entered without being in a HyperV Running state even reset again - disabling VM<br />"
-        $vm.currentTest = "done"
+        # $vm.currentTest = "done"
         UpdateState $vm $ForceShutdown
     }
 
