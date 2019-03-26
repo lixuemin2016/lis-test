@@ -163,16 +163,18 @@ if ($BuildNumber -ge 9600)
 
     	Enable-VMIntegrationService -Name "Guest Service Interface" -vmName $vmName -ComputerName $hvServer
     	Start-VM -Name $vmName -ComputerName $hvServer
-
-    	# Waiting for the VM to run again and respond to SSH - port
-        $timeout = 200
-        if (-not (WaitForVMToStartSSH $ipv4 $timeout))
-        {
-            "Error: Test case timed out for VM to be running again!"
+    
+        # Wait for VM boot up and update ip address
+        $new_ip = GetIPv4AndWaitForSSHStart $vmName $hvServer $sshKey 360
+        if ($new_ip) {$ipv4 = $new_ip}
+        else{
+            Write-Output "Error: VM $vmName failed at reboot" | Tee-Object -Append -file $summaryLog
             return $False
         }
     }
 }
+
+
 $retVal = SendCommandToVM $ipv4 $sshkey "echo BuildNumber=$BuildNumber >> /root/constants.sh"
 if (-not $retVal[-1]){
     Write-Output "Error: Could not echo BuildNumber=$BuildNumber to vm's constants.sh."
