@@ -115,6 +115,7 @@ do
     sleep 5
     PingCheck "$TestCount"
 done
+ChangeInterfaceState "down"
 UpdateSummary "Successful interface restart and ping check."
 
 LogMsg "#########################################################"
