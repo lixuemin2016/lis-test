@@ -21,7 +21,7 @@
 #
 #####################################################################
 
-NetInterface="eth1"
+NetInterface="eth0"
 REMOTE_SERVER="8.8.4.4"
 LoopCount=10
 TestCount=0
@@ -115,7 +115,7 @@ do
     sleep 5
     PingCheck "$TestCount"
 done
-ChangeInterfaceState "down"
+
 UpdateSummary "Successful interface restart and ping check."
 
 LogMsg "#########################################################"
