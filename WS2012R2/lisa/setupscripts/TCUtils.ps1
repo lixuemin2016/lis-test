@@ -2141,11 +2141,11 @@ function GetVMFeatureSupportStatus([String] $ipv4, [String] $sshKey, [String]$su
     $cKernel = $currentKernel.split(".-")
 
     for ($i=0; $i -le 3; $i++) {
-        if ($cKernel[$i] -lt $sKernel[$i] ) {
+        if ([int]$cKernel[$i] -lt [int]$sKernel[$i] ) {
             $cmpResult = $false
             break;
         }
-        if ($cKernel[$i] -gt $sKernel[$i] ) {
+        if ([int]$cKernel[$i] -gt [int]$sKernel[$i] ) {
             $cmpResult = $true
             break
         }
