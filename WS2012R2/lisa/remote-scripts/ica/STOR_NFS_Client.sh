@@ -134,9 +134,9 @@ function UpdateTestState()
 
 StartTst=$(date +%s.%N)
 # Check for call trace log
-dos2unix check_traces.sh
-chmod +x check_traces.sh
-./check_traces.sh &
+# dos2unix check_traces.sh
+# chmod +x check_traces.sh
+# ./check_traces.sh &
 TestNFS
 
 EndTst=$(date +%s.%N)

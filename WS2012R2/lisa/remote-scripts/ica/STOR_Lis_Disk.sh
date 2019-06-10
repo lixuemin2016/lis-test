@@ -294,10 +294,10 @@ if  [ ! ${filesystem} ];
 then filesystem=(ext3)
 fi
 
-# Check for call trace log
-dos2unix check_traces.sh
-chmod +x check_traces.sh
-./check_traces.sh &
+# # Check for call trace log
+# dos2unix check_traces.sh
+# chmod +x check_traces.sh
+# ./check_traces.sh &
 
 for driveName in /dev/sd*[^0-9];
 do

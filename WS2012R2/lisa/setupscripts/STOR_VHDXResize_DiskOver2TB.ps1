@@ -335,4 +335,12 @@ if (-not $($CheckResultsts[-1]))
 "Info : The guest sees the new size ($diskSize)" | Tee-Object -Append -file $summaryLog
 "Info : VHDx Resize - ${TC_COVERED} is Done"
 
+# Wait 2 minutes and check call traces
+$retVal = CheckCallTracesWithDelay $sshKey $ipv4
+if (-not $retVal) {
+    Write-Output "ERROR: Call traces have been found on VM after the test run" | Tee-Object -Append -file $summaryLog
+    return $false
+} else {
+    Write-Output "Info: No Call Traces have been found on VM" | Tee-Object -Append -file $summaryLog
+}
 return $True

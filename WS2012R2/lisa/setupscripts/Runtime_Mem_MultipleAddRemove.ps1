@@ -514,7 +514,7 @@ while ($timeout -gt 0){
   $timeout -= 1
   start-sleep -s 1
 }
-start-sleep -s 5
+start-sleep -s 50
 
 # get memory stats after strss-ng stopped running
 [int64]$vm1AfterStressAssigned = ($vm1.MemoryAssigned/1MB)

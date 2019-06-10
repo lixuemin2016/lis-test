@@ -74,10 +74,10 @@ fi
 
 echo "Covers : ${TC_COVERED}" >> ~/summary.log
 
-# Check for call trace log
-dos2unix check_traces.sh > /dev/null 2>&1
-chmod +x check_traces.sh
-./check_traces.sh &
+# # Check for call trace log
+# dos2unix check_traces.sh > /dev/null 2>&1
+# chmod +x check_traces.sh
+# ./check_traces.sh &
 
 #
 # Count the number of SCSI= and IDE= entries in constants

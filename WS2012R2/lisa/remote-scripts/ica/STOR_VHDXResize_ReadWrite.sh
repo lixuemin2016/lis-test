@@ -5,11 +5,11 @@
 # Linux on Hyper-V and Azure Test Code, ver. 1.0.0
 # Copyright (c) Microsoft Corporation
 #
-# All rights reserved. 
+# All rights reserved.
 # Licensed under the Apache License, Version 2.0 (the ""License"");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#     http://www.apache.org/licenses/LICENSE-2.0  
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
 # OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
@@ -29,7 +29,7 @@
 #    2. Creates a folder on the mounted partition
 #    3. Copies the created file on that specific path
 #    4. Writes, reads and deletes the copied file
-#    5. Deletes the previously created folder 
+#    5. Deletes the previously created folder
 #
 ########################################################################
 
@@ -50,7 +50,7 @@ UpdateTestState()
     echo $1 > $HOME/state.txt
 }
 
-function checkResult() 
+function checkResult()
 {
 	if [ $? -ne 0 ]; then
 		LogMsg $1
@@ -64,9 +64,9 @@ testDir=/mnt/testDir
 testFile=/mnt/testDir/testFile
 
 # Check for call trace log
-dos2unix check_traces.sh
-chmod +x check_traces.sh
-./check_traces.sh &
+# dos2unix check_traces.sh
+# chmod +x check_traces.sh
+# ./check_traces.sh &
 
 #
 # Read/Write mount point
@@ -90,7 +90,7 @@ if [ $original_file_size != $target_file_size ]; then
 fi
 
 target_checksum=$(sha1sum $testFile | awk '{ print $1}')
-if [ $original_checksum != $target_checksum ]; then 
+if [ $original_checksum != $target_checksum ]; then
 	msg="File checksums do not match: ${original_checksum} - ${target_checksum}"
 	LogMsg $msg
 	echo $msg >> ~/summary.log
@@ -118,4 +118,4 @@ msg="Successfully run read/write script"
 LogMsg $msg
 echo $msg > ~/summary.log
 
-exit 0 
+exit 0
