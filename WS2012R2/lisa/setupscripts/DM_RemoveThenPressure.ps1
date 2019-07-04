@@ -223,7 +223,7 @@ if ($vm1BeforeAssigned -le 0 -or $vm1BeforeDemand -le 0){
 
 $sleepPeriod = 0 #seconds
 
-while ($sleepPeriod -lt 420){
+while ($sleepPeriod -lt 540){
     [int64]$vm1Assigned = ($vm1.MemoryAssigned/1MB)
     [int64]$vm1Demand = ($vm1.MemoryDemand/1MB)
     if ( $vm1Assigned -lt $vm1BeforeAssigned){
