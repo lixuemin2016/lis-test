@@ -254,11 +254,24 @@ then
     exit 1
 fi
 
+# Convert eol
+dos2unix utils.sh
+
+# Source utils.sh
+. utils.sh || {
+    echo "Error: unable to source utils.sh!"
+    echo "TestAborted" > state.txt
+    exit 1
+}
+
+osdisk=$(get_OSdisk)
+UpdateSummary "OS disk:$osdisk"
+
 for driveName in /dev/sd*[^0-9];
 do
 
-    # Skip /dev/sda
-    if [ ${driveName} = "/dev/sda" ]; then
+    # Skip os disk
+    if [ ${driveName} = "/dev/${osdisk}" ]; then
         continue
     fi
     

@@ -72,15 +72,18 @@ echo -e "blacklist {\n\tdevnode \"^sd[a-z]\"\n}" > /etc/multipath.conf
 service multipathd restart
 sleep 5
 
+osdisk=$(get_OSdisk)
+UpdateSummary "OS disk:$osdisk"
+
 #
 # For each drive, run fdisk -l and extract the drive size in bytes
 #
 for driveName in /dev/sd*[^0-9];
 do
     #
-    # Skip /dev/sda
+    # Skip os disk
     #
-    if [ ${driveName} = "/dev/sda" ]; then
+    if [ ${driveName} = "/dev/${osdisk}" ]; then
         continue
     fi
     fdisk -l $driveName > fdisk.dat 2> /dev/null

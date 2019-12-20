@@ -193,6 +193,16 @@ else
     exit 10
 fi
 
+# Convert eol
+dos2unix utils.sh
+
+# Source utils.sh
+. utils.sh || {
+    echo "Error: unable to source utils.sh!"
+    echo "TestAborted" > state.txt
+    exit 1
+}
+
 echo "Covers : ${TC_COVERED}" >> ~/summary.log
 
 #
@@ -299,12 +309,17 @@ fi
 # chmod +x check_traces.sh
 # ./check_traces.sh &
 
+osdisk=$(get_OSdisk)
+UpdateSummary "OS disk:$osdisk"
+
+echo "Info: os disk is $osdisk"
+
 for driveName in /dev/sd*[^0-9];
 do
     #
-    # Skip /dev/sda
+    # Skip osdisk
     #
-    if [ ${driveName} = "/dev/sda" ]; then
+    if [ ${driveName} = "/dev/${osdisk}" ]; then
         continue
     fi
   for fs in "${fileSystems[@]}"; do

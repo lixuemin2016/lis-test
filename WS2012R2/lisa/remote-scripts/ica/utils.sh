@@ -2203,3 +2203,17 @@ CheckCallTracesWithDelay()
         return 0
     fi
 }
+
+function get_OSdisk() {
+	for driveName in /dev/sd*[^0-9];
+	do
+		# Get the OS disk based on "Linux filesystem" string or BootFlag(*) of a partition
+		fdisk -l $driveName 2> /dev/null | grep -i "Linux filesystem\|/dev/sd[a-z][0-9]\+[ ]*\*" > /dev/null
+		if [ 0 -eq $? ]; then
+			os_disk=$(echo $driveName | awk -v FS=/ '{print $NF}')
+			break
+		fi
+	done
+
+	echo "$os_disk"
+}

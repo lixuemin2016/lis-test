@@ -94,11 +94,25 @@ if [ $? -ne 0 ]; then
     exit 2
 fi
 
+
+# Convert eol
+dos2unix utils.sh
+
+# Source utils.sh
+. utils.sh || {
+    echo "Error: unable to source utils.sh!"
+    echo "TestAborted" > state.txt
+    exit 1
+}
+
+osdisk=$(get_OSdisk)
+UpdateSummary "OS disk:$osdisk"
+
 # Count the Number of partition present in added new Disk .
 count=0
 for disk in $(cat /proc/partitions | grep sd | awk '{print $4}')
 do
-        if [[ "$disk" != "sda"* ]];
+        if [[ "$disk" != "$osdisk"* ]];
         then
                 ((count++))
         fi
@@ -110,9 +124,9 @@ done
 for driveName in /dev/sd*[^0-9];
 do
     #
-    # Skip /dev/sda
+    # Skip os disk
     #
-    if [ $driveName != "/dev/sda"  ] ; then
+    if [ $driveName != "/dev/${osdisk}"  ] ; then
 
     # Delete the exisiting partition
 

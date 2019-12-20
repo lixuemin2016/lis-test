@@ -107,13 +107,25 @@ done
 count=$(grep -c 'sd[b-z][0-9]' /proc/partitions)
 
 LogMsg "Total number of partitions ${count}" >> ~/summary.log
+# Convert eol
+dos2unix utils.sh
+
+# Source utils.sh
+. utils.sh || {
+    echo "Error: unable to source utils.sh!"
+    echo "TestAborted" > state.txt
+    exit 1
+}
+
+osdisk=$(get_OSdisk)
+UpdateSummary "OS disk:$osdisk"
 
 for driveName in /dev/sd*[^0-9]
 do
     #
-    # Skip /dev/sda
+    # Skip os disk
     #
-    if [ $driveName != "/dev/sda" ]
+    if [ $driveName != "/dev/${osdisk}" ]
     then
         drives+=($driveName)
 

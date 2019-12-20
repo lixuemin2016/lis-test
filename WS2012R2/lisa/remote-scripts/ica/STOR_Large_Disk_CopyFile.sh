@@ -241,6 +241,16 @@ fi
 
 echo "Covers: ${TC_COVERED}" >> ~/summary.log
 
+# Convert eol
+dos2unix utils.sh
+
+# Source utils.sh
+. utils.sh || {
+    echo "Error: unable to source utils.sh!"
+    echo "TestAborted" > state.txt
+    exit 1
+}
+
 # Check for call trace log
 # dos2unix check_traces.sh
 # chmod +x check_traces.sh
@@ -267,11 +277,13 @@ done
 
 echo "constants disk count= $diskCount"
 
+osdisk=$(get_OSdisk)
+UpdateSummary "OS disk:$osdisk"
 # Compute the number of sd* drives on the system
 for driveName in /dev/sd*[^0-9];
 do
-    # Skip /dev/sda
-    if [ ${driveName} = "/dev/sda" ]; then
+    # Skip os disk
+    if [ ${driveName} = "/dev/${osdisk}" ]; then
         continue
     fi
 
