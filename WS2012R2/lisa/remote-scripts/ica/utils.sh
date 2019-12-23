@@ -2217,3 +2217,18 @@ function get_OSdisk() {
 
 	echo "$os_disk"
 }
+
+function get_Datadisk() {
+	
+	os_disk=$(get_OSdisk)
+	for dev in /dev/sd*[^0-9]; do
+        # Skip the OS disk
+        if [ $dev == "/dev/$os_disk" ]; then
+            continue
+        fi
+        deviceName=$(echo $dev | awk -v FS=/ '{print $NF}')
+        break
+    done
+
+    echo "$deviceName"
+}

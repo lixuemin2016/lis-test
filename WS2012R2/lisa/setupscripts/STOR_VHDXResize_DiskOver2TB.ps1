@@ -173,6 +173,8 @@ Write-Output "Covers: ${TC_COVERED}" | Tee-Object -Append -file $summaryLog
 #
 $newVhdxSize = ConvertStringToUInt64 $newSize
 $sizeFlag = ConvertStringToUInt64 "20GB"
+
+$dataDiskName= getDataDisk $ipv4 $sshKey
 #
 # Make sure the VM has a SCSI 0 controller, and that
 # Lun 0 on the controller has a .vhdx file attached.
@@ -280,14 +282,14 @@ Start-Sleep -s 60
 # Check if the guest sees the added space
 #
 "Info : Check if the guest sees the new space"
-.\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "echo 1 > /sys/block/sdb/device/rescan"
+.\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "echo 1 > /sys/block/$dataDiskName/device/rescan"
 if (-not $?)
 {
     "Error: Failed to force SCSI device rescan" | Tee-Object -Append -file $summaryLog
     return $False
 }
 
-$diskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/sdb  2> /dev/null | grep Disk | grep sdb | cut -f 5 -d ' '"
+$diskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/$dataDiskName  2> /dev/null | grep Disk | grep $dataDiskName | cut -f 5 -d ' '"
 if (-not $?)
 {
     "Error: Unable to determine disk size from within the guest after growing the VHDX" | Tee-Object -Append -file $summaryLog

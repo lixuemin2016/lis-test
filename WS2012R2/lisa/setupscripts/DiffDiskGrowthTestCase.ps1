@@ -203,6 +203,7 @@ else {
 	return $False
 }
 
+$dataDiskName= getDataDisk $ipv4 $sshKey
 # del $summaryLog -ErrorAction SilentlyContinue
 $summaryLog = "${vmName}_summary.log"
 "Covers: ${TC_COVERED}" >> $summaryLog
@@ -371,7 +372,7 @@ if (-not $?)
 #
 # Tell the guest OS to write a few MB to the differencing disk
 #
-$sts = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "dd if=/dev/sdb1 of=/mnt/2/DiffDiskGrowthTestCase/test.dat count=2048 > /dev/null 2>&1" | out-null
+$sts = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "dd if=${dataDiskName}1 of=/mnt/2/DiffDiskGrowthTestCase/test.dat count=2048 > /dev/null 2>&1" | out-null
 if (-not $?)
 {
     "Error: Unable to send command to VM to grow the .vhd"

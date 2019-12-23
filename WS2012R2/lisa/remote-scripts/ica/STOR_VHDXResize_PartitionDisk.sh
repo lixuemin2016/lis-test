@@ -95,10 +95,26 @@ if [ "${fileSystems:-UNDEFINED}" = "UNDEFINED" ]; then
     exit 30
 fi
 
+
+# Convert eol
+dos2unix utils.sh
+
+# Source utils.sh
+. utils.sh || {
+    echo "Error: unable to source utils.sh!"
+    echo "TestAborted" > state.txt
+    exit 1
+}
+
+datadisk=$(get_Datadisk)
+UpdateSummary "Data disk:$datadisk"
+
+driveName=/dev/$datadisk
+
 #
 # Verify if guest sees the new drive
 #
-if [ ! -e "/dev/sdb" ]; then
+if [ ! -e "${driveName}" ]; then
     msg="Error: The Linux guest cannot detect the drive"
     LogMsg $msg
     echo $msg >> ~/summary.log
@@ -114,10 +130,10 @@ chmod +x STOR_VHDXResize_ReadWrite.sh
 #If the script is being run a second time modify the following variables
 if [ "$rerun" = "yes" ]; then
     LogMsg "Info: Second pass of the script."
-    testPartition="/dev/sdb2"
+    testPartition="${driveName}2"
     fdiskOption=2
 else
-    testPartition="/dev/sdb1"
+    testPartition="${driveName}1"
     fdiskOption=1
 fi
 
@@ -127,8 +143,8 @@ for fs in "${fileSystems[@]}"; do
     # Create the new partition
     # delete partition firstly maily used if partition size >2TB, after use parted
     # to rm partition, still can show in fdisk -l even it does not exist in fact.
-    (echo d; echo w) | fdisk /dev/sdb 2> /dev/null
-    (echo n; echo p; echo $fdiskOption; echo ; echo ;echo w) | fdisk /dev/sdb 2> /dev/null
+    (echo d; echo w) | fdisk ${driveName} 2> /dev/null
+    (echo n; echo p; echo $fdiskOption; echo ; echo ;echo w) | fdisk ${driveName} 2> /dev/null
     if [ $? -gt 0 ]; then
         LogMsg "Error: Failed to create partition"
         echo "Error: Creating partition: Failed" >> ~/summary.log
@@ -201,7 +217,7 @@ for fs in "${fileSystems[@]}"; do
     fi
     LogMsg "Info: Unmount partition successful"
 
-    (echo d; echo w) | fdisk /dev/sdb 2> /dev/null
+    (echo d; echo w) | fdisk ${driveName} 2> /dev/null
     if [ $? -ne 0 ]; then
         LogMsg "Error: Failed to delete partition"
         echo "Error: Deleting partition: Failed" >> ~/summary.log

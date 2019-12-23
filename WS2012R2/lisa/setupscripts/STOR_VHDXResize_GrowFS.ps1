@@ -220,6 +220,8 @@ if (-not $vhdPath.EndsWith(".vhdx") -and -not $vhdPath.EndsWith(".avhdx"))
 $newVhdxSize = ConvertStringToUInt64 $newSize
 $guest_script = "STOR_VHDXResize_GrowFSAfterResize"
 
+$dataDiskName= getDataDisk $ipv4 $sshKey
+
 foreach ($fs in $fileSystems){
 
 	"Info: Start testing $fs with resize VHD to $newVhdxSize."
@@ -302,14 +304,14 @@ foreach ($fs in $fileSystems){
 	#
 	# Check if the guest sees the added space
 	#
-	.\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "echo 1 > /sys/block/sdb/device/rescan"
+	.\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "echo 1 > /sys/block/$dataDiskName/device/rescan"
 	if (-not $?)
 	{
 		"Error: Failed to force SCSI device rescan" | Tee-Object -Append -file $summaryLog
 		return $False
 	}
 
-	$diskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/sdb  2> /dev/null | grep Disk | grep sdb | cut -f 5 -d ' '"
+	$diskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/$dataDiskName  2> /dev/null | grep Disk | grep $dataDiskName | cut -f 5 -d ' '"
 	if (-not $?)
 	{
 		"Error: Unable to determine disk size from within the guest after growing the VHDX" | Tee-Object -Append -file $summaryLog

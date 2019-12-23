@@ -40,8 +40,21 @@ ICA_TESTABORTED="TestAborted"
 ICA_TESTFAILED="TestFailed"
 
 # Need to add one disk before test
-driveName=/dev/sdb
 
+# Convert eol
+dos2unix utils.sh
+
+# Source utils.sh
+. utils.sh || {
+    echo "Error: unable to source utils.sh!"
+    echo "TestAborted" > state.txt
+    exit 1
+}
+
+datadisk=$(get_Datadisk)
+UpdateSummary "Data disk:$datadisk"
+
+driveName=/dev/$datadisk
 # Adds a timestamp to the log file
 #######################################################################
 LogMsg()

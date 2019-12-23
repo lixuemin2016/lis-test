@@ -54,6 +54,21 @@ UpdateTestState()
     echo $1 > $HOME/state.txt
 }
 
+# Convert eol
+dos2unix utils.sh
+
+# Source utils.sh
+. utils.sh || {
+    echo "Error: unable to source utils.sh!"
+    echo "TestAborted" > state.txt
+    exit 1
+}
+
+datadisk=$(get_Datadisk)
+UpdateSummary "Data disk:$datadisk"
+
+driveName=/dev/$datadisk
+
 LogMsg "Updating test case state to running"
 UpdateTestState $ICA_TESTRUNNING
 
@@ -78,7 +93,7 @@ fi
 #
 # Verify if guest sees the new drive
 #
-if [ ! -e "/dev/sdb" ]; then
+if [ ! -e "${driveName}" ]; then
     msg="The Linux guest cannot detect the drive"
     LogMsg $msg
     echo $msg >> ~/summary.log
@@ -96,7 +111,7 @@ fi
 #
 # Create the new partition
 #
-parted /dev/sdb -s mklabel gpt mkpart primary 0GB $NewSize 2> ~/summary.log
+parted ${driveName} -s mklabel gpt mkpart primary 0GB $NewSize 2> ~/summary.log
 if [ $? -gt 0 ]; then
     LogMsg "Failed to create partition by parted with $NewSize"
     echo "Creating partition: Failed by parted with $NewSize" >> ~/summary.log
@@ -118,7 +133,7 @@ for fs in "${fileSystems[@]}"; do
         LogMsg "File-system tools for $fs not present. Skipping filesystem $fs."
         count=`expr $count + 1`
     else
-        mkfs -t $fs /dev/sdb1 2> ~/summary.log
+        mkfs -t $fs ${driveName}1 2> ~/summary.log
         if [ $? -gt 0 ]; then
             LogMsg "Failed to format partition with $fs"
             echo "Formating partition: Failed with $fs" >> ~/summary.log
@@ -152,7 +167,7 @@ if [ ! -e "/mnt" ]; then
     LogMsg "Mount point /dev/mnt created"
 fi
 
-mount /dev/sdb1 /mnt 2> ~summary.log
+mount ${driveName}1 /mnt 2> ~summary.log
 if [ $? -gt 0 ]; then
     LogMsg "Failed to mount partition"
     echo "Mounting partition: Failed" >> ~/summary.log
@@ -177,7 +192,7 @@ if [ $? -gt 0 ]; then
 fi
 LogMsg "Unmount partition successful"
 
-parted /dev/sdb -s rm 1
+parted ${driveName} -s rm 1
 if [ $? -gt 0 ]; then
     LogMsg "Failed to delete partition"
     echo "Deleting partition: Failed" >> ~/summary.log

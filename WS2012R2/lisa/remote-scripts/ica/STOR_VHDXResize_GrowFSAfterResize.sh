@@ -77,12 +77,28 @@ else
     exit 10
 fi
 
+# Convert eol
+dos2unix utils.sh
+
+# Source utils.sh
+. utils.sh || {
+    echo "Error: unable to source utils.sh!"
+    echo "TestAborted" > state.txt
+    exit 1
+}
+
+datadisk=$(get_Datadisk)
+UpdateSummary "Data disk:$datadisk"
+
+driveName=/dev/$datadisk
+
+
 # Prepare Read/Write script for execution
 dos2unix STOR_VHDXResize_ReadWrite.sh
 chmod +x STOR_VHDXResize_ReadWrite.sh
 
 # Verify if guest sees the drive
-if [ ! -e "/dev/sdb" ]; then
+if [ ! -e "$driveName" ]; then
     msg="The Linux guest cannot detect the drive"
     LogMsg $msg
     echo $msg >> ~/summary.log
@@ -97,7 +113,7 @@ if ! [ "$rerun" = "yes" ]; then
 
     # Create the partition
     LogMsg "Info: Creating the partition on initial size of VHD."
-    (echo n; echo p; echo 1; echo ; echo ;echo w) | fdisk /dev/sdb 2> /dev/null
+    (echo n; echo p; echo 1; echo ; echo ;echo w) | fdisk $driveName 2> /dev/null
     if [ $? -gt 0 ]; then
         LogMsg "Failed to create partition."
         echo "Restore partition: Failed" >> ~/summary.log
@@ -120,7 +136,7 @@ if ! [ "$rerun" = "yes" ]; then
         if [ "$fs" = "xfs" ]; then
             option="-f"
         fi
-        mkfs -t $fs $option /dev/sdb1 2> ~/summary.log
+        mkfs -t $fs $option ${driveName}1 2> ~/summary.log
         if [ $? -ne 0 ]; then
             LogMsg "Error: Failed to format partition with $fs"
             echo "Error: Formating partition: Failed with $fs" >> ~/summary.log
@@ -142,7 +158,7 @@ if ! [ "$rerun" = "yes" ]; then
         LogMsg "Info: Mount point /dev/mnt created"
     fi
 
-    mount /dev/sdb1 /mnt 2> ~/summary.log
+    mount ${driveName}1 /mnt 2> ~/summary.log
     if [ $? -ne 0 ]; then
         LogMsg "Error: Failed to mount partition"
         echo "Error: Mounting partition: Failed" >> ~/summary.log
@@ -151,7 +167,7 @@ if ! [ "$rerun" = "yes" ]; then
     fi
     LogMsg "Info: Partition mount successful"
 
-    mount | grep /dev/sdb1
+    mount | grep ${driveName}1
 
     # Read/Write mount point
     ./STOR_VHDXResize_ReadWrite.sh
@@ -170,9 +186,9 @@ else
     LogMsg "Info: Expand partition to the new size"
 
     # Expand partition to the new size of disk
-    (echo d; echo w) | fdisk /dev/sdb 2> /dev/null
+    (echo d; echo w) | fdisk $driveName 2> /dev/null
     partprobe
-    (echo n; echo p; echo 1; echo ; echo ;echo w) | fdisk /dev/sdb 2> /dev/null
+    (echo n; echo p; echo 1; echo ; echo ;echo w) | fdisk $driveName 2> /dev/null
     if [ $? -gt 0 ]; then
         LogMsg "Failed to expand partition"
         echo "Expanding partition: Failed" >> ~/summary.log
@@ -188,7 +204,7 @@ else
     # Because e2fsck and resize2fs only work for ext filesystems
     # we need to skip xfs for now
     if [ ! "$fs" = "xfs" ]; then
-        e2fsck -y -v -f /dev/sdb1
+        e2fsck -y -v -f ${driveName}1
         if [ $? -gt 0 ]; then
             LogMsg "Failed to check filesystem $fs."
             echo "Checking filesystem $fs: Failed" >> ~/summary.log
@@ -200,7 +216,7 @@ else
 
     # Resizing the filesystem
     if [ ! "$fs" = "xfs" ]; then
-        resize2fs /dev/sdb1
+        resize2fs ${driveName}1
         if [ $? -gt 0 ]; then
             LogMsg "Failed to resize filesystem $fs."
             echo "Resizing the filesystem $fs: Failed" >> ~/summary.log
@@ -222,7 +238,7 @@ else
         LogMsg "Mount point /dev/mnt created"
     fi
 
-    mount /dev/sdb1 /mnt 2> ~/summary.log
+    mount ${driveName}1 /mnt 2> ~/summary.log
     if [ $? -gt 0 ]; then
         LogMsg "Failed to mount partition"
         echo "Mounting partition: Failed" >> ~/summary.log
@@ -230,7 +246,7 @@ else
         exit 10
     fi
     LogMsg "Partition mount successful"
-    mount | grep /dev/sdb1
+    mount | grep ${driveName}1
 
     # If the partition was successfully mounted we can use xfs_growsfs to
     # check the XFS filesystem also
@@ -267,9 +283,9 @@ else
     fi
 
     #Delete partition
-    (echo d; echo w) | fdisk /dev/sdb 2> ~/summary.log
+    (echo d; echo w) | fdisk $driveName 2> ~/summary.log
     partprobe
-    lsblk | grep sdb1
+    lsblk | grep ${driveName}1
     if [ $? -eq 0 ]; then
         LogMsg "Failed to delete partition"
         echo "Deleting partition: Failed" >> ~/summary.log

@@ -271,6 +271,8 @@ if (-not $($sts[-1]))
 # Source the TCUtils.ps1 file
 . .\setupscripts\TCUtils.ps1
 
+
+
 # for IDE and offline resize disk need to stop VM before resize
 
 if ( $controllerType -eq "IDE" -or $offline -eq "True"  )
@@ -327,10 +329,11 @@ $sleepTime = 5
 # Older kernels might require a few requests to refresh the disks info
 $cmdStatus = $False
 $maxChecks = 0
+$dataDiskName= getDataDisk $ipv4 $sshKey
 
 while (-not $cmdStatus -and $maxChecks -lt 3)
 {
-  .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "echo 1 > /sys/block/sdb/device/rescan"
+  .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "echo 1 > /sys/block/$dataDiskName/device/rescan"
   if (-not $?)
   {
     $maxChecks = $maxChecks + 1
@@ -348,7 +351,7 @@ if (-not $cmdStatus)
 }
 
 
-$growDiskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/sdb  2> /dev/null | grep Disk | grep sdb | cut -f 5 -d ' '"
+$growDiskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/$dataDiskName  2> /dev/null | grep Disk | grep $dataDiskName | cut -f 5 -d ' '"
 if (-not $?)
 {
     "Error: Unable to determine disk size from within the guest after growing the VHDX" | Tee-Object -Append -file $summaryLog
@@ -437,7 +440,7 @@ $maxChecks = 0
 
 while (-not $cmdStatus -and $maxChecks -lt 3)
 {
-  .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "echo 1 > /sys/block/sdb/device/rescan"
+  .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "echo 1 > /sys/block/$dataDiskName/device/rescan"
   if (-not $?)
   {
     $maxChecks = $maxChecks + 1
@@ -454,7 +457,7 @@ if (-not $cmdStatus)
     "Warning: Failed to force $controllerType device rescan" | Tee-Object -Append -file $summaryLog
 }
 
-$shrinkDiskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/sdb  2> /dev/null | grep Disk | grep sdb | cut -f 5 -d ' '"
+$shrinkDiskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/$dataDiskName  2> /dev/null | grep Disk | grep $dataDiskName | cut -f 5 -d ' '"
 if (-not $?)
 {
     "Error: Unable to determine disk size from within the guest after shrinking the VHDX" | Tee-Object -Append -file $summaryLog

@@ -89,7 +89,8 @@ function check_file([String] $testfile)
 function mount_disk()
 {
     . .\setupScripts\TCUtils.ps1
-    $driveName = "/dev/sdb"
+    $dataDiskName= getDataDisk $ipv4 $sshKey
+    $driveName = "/dev/$dataDiskName"
 
     $sts = SendCommandToVM $ipv4 $sshKey "(echo d;echo;echo w)|fdisk ${driveName}"
     if (-not $sts) {
