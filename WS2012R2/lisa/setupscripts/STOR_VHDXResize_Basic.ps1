@@ -188,9 +188,6 @@ Write-Output "Covers: ${TC_COVERED}" | Tee-Object -Append -file $summaryLog
 $newVhdxSize = ConvertStringToUInt64 $newSize
 $sizeFlag = ConvertStringToUInt64 "20GB"
 
-# e.g. sdx
-$dataDiskName= getDataDisk $ipv4 $sshKey
-write-host "dataDiskName: $dataDiskName"
 #
 # Make sure the VM has a SCSI 0 controller, and that
 # Lun 0 on the controller has a .vhdx file attached.
@@ -296,9 +293,11 @@ if ( $controllerType -eq "IDE" )
   {
       Write-Output "INFO: Started VM ${vmName}"
   }
-
 }
 
+# e.g. sdx
+$dataDiskName= getDataDisk $ipv4 $sshKey
+write-Output "dataDiskName after reboot: $dataDiskName"
 # check file size after resize
 $vhdxInfoResize = Get-VHD -Path $vhdPath -ComputerName $hvServer -ErrorAction SilentlyContinue
 
@@ -329,7 +328,7 @@ if (-not $?)
 }
 
 
-$diskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/$dataDiskName  2> /dev/null | grep Disk | grep sdb | cut -f 5 -d ' '"
+$diskSize = .\bin\plink.exe -i ssh\${sshKey} root@${ipv4} "fdisk -l /dev/$dataDiskName  2> /dev/null | grep Disk | grep $dataDiskName  | cut -f 5 -d ' '"
 if (-not $?)
 {
     "Error: Unable to determine disk size from within the guest after growing the VHDX" | Tee-Object -Append -file $summaryLog

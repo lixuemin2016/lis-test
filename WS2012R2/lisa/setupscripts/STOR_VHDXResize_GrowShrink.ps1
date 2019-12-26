@@ -435,6 +435,7 @@ if ( $controllerType -eq "IDE" -or $offline -eq "True" )
 "Info : Check if the guest sees the new size"
 # Older kernels might require a few requests to refresh the disks info
 
+$dataDiskName= getDataDisk $ipv4 $sshKey
 $cmdStatus = $False
 $maxChecks = 0
 
