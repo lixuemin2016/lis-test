@@ -177,6 +177,10 @@ do
     sleep $Duration
     modprobe hid_hyperv
     sleep $Duration
+    modprobe -r hyperv_keyboard
+    sleep $Duration
+    modprobe hyperv_keyboard
+    sleep $Duration
     pass=$((pass+1))
     echo $pass
 done
@@ -185,14 +189,14 @@ DIFF=$(echo "$END - $START" | bc)
 
 echo "Info: Finished testing, bringing up eth0"
 ifdown eth0 && ifup eth0
-dhclient
-if [[ $? -ne 0 ]]; then
-    msg="Error: dhclient exited with an error"
-    LogMsg "${msg}"
-    echo "$msg" >> ~/summary.log
-    UpdateTestState $ICA_TESTFAILED
-    exit 1
-fi
+# dhclient
+# if [[ $? -ne 0 ]]; then
+#     msg="Error: dhclient exited with an error"
+#     LogMsg "${msg}"
+#     echo "$msg" >> ~/summary.log
+#     UpdateTestState $ICA_TESTFAILED
+#     exit 1
+# fi
 VerifyModules
 
 # inet\b only shows the IPv4 address of the interface
