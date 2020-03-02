@@ -1392,6 +1392,12 @@ function installApp([string]$appName, [string]$customIP, [string]$appGitURL, [st
     {
         .\bin\plink -i ssh\${sshKey} root@${customIP} "cd  /root/$appName; git checkout tags/$appGitTag > /dev/null 2>&1"
     }
+    # if fail to git clone, try wget and unzip
+    if (-not $?) {
+        Write-Host "Info: git clone failed, try to get url from $appGitURL by wget"
+        .\bin\plink -i ssh\${sshKey} root@${customIP} "cd /root; wget $appGitURL; tar -xvf ${appName}.zip"
+    }
+
     .\bin\plink -i ssh\${sshKey} root@${customIP} "cd /root/$appName; ./configure > /dev/null 2>&1; make > /dev/null 2>&1; make install > /dev/null 2>&1"
 
     $retVal = checkApp $appName $customIP
