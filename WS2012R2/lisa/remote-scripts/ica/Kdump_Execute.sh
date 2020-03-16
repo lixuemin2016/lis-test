@@ -242,3 +242,4 @@ sync
 sleep 6
 
 echo 1 > /proc/sys/kernel/sysrq
+SetTestStateCompleted

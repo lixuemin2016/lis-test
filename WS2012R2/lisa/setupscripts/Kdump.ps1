@@ -267,7 +267,7 @@ else {
     else {
         # If directly use plink to trigger kdump, command fails to exit, so use start-process
         $tmpCmd = "echo c > /proc/sysrq-trigger 2>/dev/null &"
-        Start-Process bin\plink -ArgumentList "-i ssh\${sshKey} root@${ipv4} ${tmpCmd}" -NoNewWindow
+        Start-Process bin\plink -ArgumentList "-i ssh\${sshKey} root@${ipv4} ${tmpCmd}" -WindowStyle Hidden
     }
 }
 

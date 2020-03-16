@@ -316,12 +316,6 @@ if (-not $isAlive){
     return $false
 }
 
-$errorsOnGuest = echo y | bin\plink -i ssh\${sshKey} root@$ipv4 "cat HotAddErrors.log"
-if (-not  [string]::IsNullOrEmpty($errorsOnGuest)){
-    $errorsOnGuest | Tee-Object -Append -file $summaryLog
-    return $false
-}
-
 Start-Sleep -s 20
 # Get memory stats after stress-ng finished
 [int64]$vm1AfterAssigned = ($vm1.MemoryAssigned/1MB)
@@ -334,6 +328,15 @@ if ($vm1AfterDemand -ge $vm1Demand)
 {
     "Error: Demand did not go down after stress-ng finished." | Tee-Object -Append -file $summaryLog
     return $false
+}
+
+# Wait for 2 minutes and check call traces and ignore oom
+$retVal = CheckCallTracesWithDelay $sshKey $ipv4 $true
+if (-not $retVal) {
+    Write-Output "ERROR: Call traces (ignore OOM) have been found on VM after the test run" | Tee-Object -Append -file $summaryLog
+    return $false
+} else {
+    Write-Output "Info: No Call Traces (ignore OOM) have been found on VM" | Tee-Object -Append -file $summaryLog
 }
 
 "Memory Hot Add (using stress-ng) completed successfully!" | Tee-Object -Append -file $summaryLog

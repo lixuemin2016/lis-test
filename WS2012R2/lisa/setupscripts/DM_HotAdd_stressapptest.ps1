@@ -105,12 +105,6 @@ $scriptBlock = {
             echo ConsumeMemory: no meminfo found. Make sure /proc is mounted >> /root/HotAdd.log 2>&1
             exit 100
         fi
-
-        rm ~/HotAddErrors.log -f
-        dos2unix check_traces.sh
-        chmod +x check_traces.sh
-        ./check_traces.sh ~/HotAddErrors.log &
-
         __totalMem=`$(cat /proc/meminfo | grep -i MemTotal | awk '{ print `$2 }')
         __totalMem=`$((__totalMem/1024))
         echo ConsumeMemory: Total Memory found `$__totalMem MB >> /root/HotAdd.log 2>&1
@@ -379,12 +373,6 @@ if (-not $isAlive){
     return $false
 }
 
-$errorsOnGuest = echo y | bin\plink -i ssh\${sshKey} root@$ipv4 "cat HotAddErrors.log"
-if (-not  [string]::IsNullOrEmpty($errorsOnGuest)){
-    $errorsOnGuest
-    return $false
-}
-
 Start-Sleep -s 20
 # get memory stats after stresstestapp finished
 [int64]$vm1AfterAssigned = ($vm1.MemoryAssigned/1MB)
@@ -397,6 +385,15 @@ if ($vm1AfterDemand -ge $vm1Demand)
 {
     "Error: Demand did not go down after stresstestapp finished." | Tee-Object -Append -file $summaryLog
     return $false
+}
+
+# Wait for 2 minutes and check call traces and ignore oom
+$retVal = CheckCallTracesWithDelay $sshKey $ipv4 $true
+if (-not $retVal) {
+    Write-Output "ERROR: Call traces (ignore OOM) have been found on VM after the test run" | Tee-Object -Append -file $summaryLog
+    return $false
+} else {
+    Write-Output "Info: No Call Traces (ignore OOM) have been found on VM" | Tee-Object -Append -file $summaryLog
 }
 
 # Everything ok

@@ -2258,12 +2258,6 @@ $DM_scriptBlock = {
           echo ConsumeMemory: no meminfo found. Make sure /proc is mounted >> /root/HotAdd.log 2>&1
           exit 100
         fi
-
-        rm ~/HotAddErrors.log -f
-        dos2unix check_traces.sh
-        chmod +x check_traces.sh
-        ./check_traces.sh ~/HotAddErrors.log &
-
         __totalMem=`$(cat /proc/meminfo | grep -i MemTotal | awk '{ print `$2 }')
         __totalMem=`$((__totalMem/1024))
         echo ConsumeMemory: Total Memory found `$__totalMem MB >> /root/HotAdd.log 2>&1
@@ -2299,7 +2293,6 @@ $DM_scriptBlock = {
         echo "Stress-ng info: `$__threads threads :: `$__chunks MB chunk size :: `$((`$timeout/1000000)) seconds between chunks :: `$duration seconds total stress time" >> /root/HotAdd.log 2>&1
         stress-ng -m `$__threads --vm-bytes `${__chunks}M -t `$duration --backoff `$timeout
         echo "Waiting for jobs to finish" >> /root/HotAdd.log 2>&1
-        wait
         exit 0
 "@
 
