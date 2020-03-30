@@ -99,6 +99,7 @@ foreach ($p in $params) {
             }
         }
         "rootDIR"  { $rootDir = $fields[1].Trim() }
+        "VM2NAME"  { $vm2Name = $fields[1].Trim() }
     }
 }
 
@@ -243,18 +244,34 @@ foreach ($p in $params)
         }
 
         #
+        # Shut down VM2
+        #
+        if (Get-VM -Name $vm2Name -ComputerName $hvServer |  Where { $_.State -like "Running" }) {
+            Stop-VM $vm2Name -ComputerName $hvServer -TurnOff -Force
+            if (-not $?) {
+                "ERROR: Failed to shutdown $vm2Name (in order to add a new network Adapter)"
+                return $false
+            }
+        }
+        #
         # Get Nic with given MAC Address
         #
-        $nic = Get-VMNetworkAdapter -VMName $vmName -ComputerName $hvServer -IsLegacy:$legacy | where {$_.MacAddress -eq $macAddress }
-        if ($nic)
-        {
+        $macSubstring=[convert]::ToInt32($macAddress.Substring(9))
+        $macSubstring = $macSubstring + 10
+        $macAddress_new = $macAddress -replace $macAddress.Substring(9), "$macSubstring"
+
+        foreach ($vm in @($vmName, $vm2Name)) {
+            $nic = Get-VMNetworkAdapter -VMName $vm -ComputerName $hvServer -IsLegacy:$legacy | where {$_.MacAddress -eq $macAddress -or $_.MacAddress -eq $macAddress_new }
+            if ($nic)
+            {
                 $nic |  Remove-VMNetworkAdapter -Confirm:$false
 
-            $retVal = $True
-        }
-        else
-        {
-            "$vmName - No NIC found with MAC $macAddress ."
+                $retVal = $True
+            }
+            else
+            {
+                "$vm - No NIC found with MAC $macAddress ."
+            }
         }
     }
 }
