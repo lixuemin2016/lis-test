@@ -296,6 +296,9 @@ GetDistro()
 		*Red*8.*)
 			DISTRO=redhat_8
 			;;
+		*Red*9.*)
+			DISTRO=redhat_9
+			;;
 		*Red*)
 			DISTRO=redhat_x
 			;;
@@ -1316,7 +1319,7 @@ CreateIfupConfigFile()
 				ifup "$__interface_name"
 
 				;;
-			redhat_7|redhat_8|centos_7|centos_8|fedora*)
+			redhat_7|redhat_8|redhat_9|centos_7|centos_8|fedora*)
 				__file_path="/etc/sysconfig/network-scripts/ifcfg-$__interface_name"
 				if [ ! -d "$(dirname $__file_path)" ]; then
 					LogMsg "CreateIfupConfigFile: $(dirname $__file_path) does not exist! Something is wrong with the network config!"

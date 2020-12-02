@@ -120,7 +120,7 @@ case $DISTRO in
         SetTestStateSkipped
         exit 1
         ;;
-    redhat_7|redhat_8|centos_7|centos_8|fedora*|suse*)
+    redhat_7|redhat_8|redhat_9|centos_7|centos_8|fedora*|suse*)
         CheckClockEvent
         CheckTimerInfo
         UnbindClockEvent

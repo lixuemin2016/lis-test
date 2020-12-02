@@ -121,7 +121,7 @@ case $DISTRO in
         UpdateSummary "WARNING: $DISTRO does not support unbind current clocksource, only check"
         CheckSource
         ;;
-    redhat_7|redhat_8|centos_7|centos_8|fedora*|suse*)
+    redhat_7|redhat_8|redhat_9|centos_7|centos_8|centos_9|fedora*|suse*)
         CheckSource
         UnbindCurrentSource
         ;;

@@ -104,7 +104,7 @@ fi
 # Try to restart NTP. If it fails we try to install it.
 if is_fedora ; then
     # RHEL 8 does not support NTP, skip test
-    if [[ $os_RELEASE =~ 8.* ]]; then
+    if [[ $os_RELEASE =~ 8.* || $os_RELEASE =~ 9.* ]]; then
         LogMsg "Info: $os_VENDOR $os_RELEASE does not support NTP. Test skipped. "
         UpdateSummary "Info: $os_VENDOR $os_RELEASE does not support NTP. Test skipped."
         SetTestStateSkipped

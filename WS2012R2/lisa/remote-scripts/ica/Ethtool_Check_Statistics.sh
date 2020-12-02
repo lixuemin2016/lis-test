@@ -123,7 +123,7 @@ SendFile() {
 				return 1
 			fi
 		fi;;
-	redhat_7|redhat_8)
+	redhat_7|redhat_8|redhat_9)
 		LogMsg "Check iptables status on RHEL."
 		systemctl status firewalld
 		if [ $? -ne 3 ]; then
